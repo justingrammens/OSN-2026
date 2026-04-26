@@ -1,0 +1,26 @@
+{
+  "name": "mdam-alert-monitor",
+  "version": "0.1.0",
+  "description": "Medication Alert Monitor — overdue dose detection and escalation",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test":              "vitest run",
+    "test:unit":         "vitest run tests/unit",
+    "test:integration":  "vitest run tests/integration",
+    "test:watch":        "vitest",
+    "check":             "pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run coverage",
+    "typecheck":         "tsc --noEmit",
+    "lint":              "eslint src tests",
+    "coverage":          "vitest run --coverage"
+  },
+  "devDependencies": {
+    "@types/node":                   "^20.0.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser":     "^7.0.0",
+    "@vitest/coverage-v8":           "^1.0.0",
+    "eslint":                        "^8.0.0",
+    "typescript":                    "^5.0.0",
+    "vitest":                        "^1.0.0"
+  }
+}

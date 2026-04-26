@@ -12,7 +12,7 @@ A safety-critical medication alert monitor for regulated healthcare environments
 
 **Feature:** Overdue Dose Alert with Escalation
 
-State machine: `PENDING → OVERDUE → ESCALATED → ACKNOWLEDGED`
+State machine: `INACTIVE → ALERT_ACTIVE → ALERT_ESCALATED → ACKNOWLEDGED`
 
 ---
 
@@ -80,10 +80,10 @@ Principles must address:
 - TypeScript strict mode, no any types, discriminated unions for state
 ```
 
-**What you get:** `.specify/memory/constitution.md` — 7 principles,
+**What you get:** `.specify/memory/constitution.md` — 7 NON-NEGOTIABLE principles,
 including explicit prohibition of `Date.now()` in business logic,
 mandatory `@satisfies REQ-NNN` annotations, and append-only audit
-enforcement. All 16 checklist items pass on first run.
+enforcement. Runtime: ~90 seconds.
 
 ---
 
@@ -125,12 +125,14 @@ VERIFICATION
 
 **What you get:** `specs/001-overdue-dose-alert/spec.md` — generated
 on branch `001-overdue-dose-alert` with:
-- 4 prioritized user stories with Given/When/Then acceptance scenarios
-- 11 numbered requirements (REQ-001 through SAFE-003) in SHALL language
-- 5 key entities (DoseEvent, AuditEntry, Alert, Actor, AlertThresholdConfig)
-- 6 measurable success criteria
+- 3 prioritized user stories with Given/When/Then acceptance scenarios
+- 12 numbered requirements (REQ-001 through REQ-012) in SHALL language
+- 4 key entities (DoseEvent, AlertRecord, AuditEntry, AlertThresholdConfig)
+- 7 measurable success criteria
 - Edge cases, assumptions, and out-of-scope boundaries
-- Quality checklist: all 16 items pass on first iteration
+- Quality checklist: all items pass on first iteration
+
+Runtime: ~2m 19s.
 
 ---
 
@@ -157,17 +159,21 @@ Architecture constraints:
 Generate: plan.md, data-model.md, research.md
 ```
 
-**What you get:** Three files generated, plus `CLAUDE.md` updated:
+**What you get:** Five files generated, plus `CLAUDE.md` updated:
 - `plan.md` — architecture decisions, Constitution Check (all 7 ✅)
 - `data-model.md` — all TypeScript types, port interfaces, PostgreSQL schema
-- `research.md` — 7 architectural decisions with justification
+- `research.md` — 8 architectural decisions with justification
+- `contracts/alert-service.ts` — typed port interfaces with `@satisfies` annotations
+- `quickstart.md` — developer setup guide
 
 Key decisions made by the AI from the constitution + spec alone:
-- `DoseState` as discriminated union — invalid states unrepresentable at compile time
-- `nowUtc: Date` injected on every function — `Date.now()` never touches business logic
-- `AuditRepository` interface exposes only `append()` — structural append-only enforcement
-- `alertDispatcher` separate from engine — errors re-throw, never suppress
-- `InvalidTransitionError` + `never` exhaustion — no silent nulls
+- `AlertRecord` as discriminated union — invalid states unrepresentable at compile time
+- `now: Date` injected on every function — `Date.now()` never touches business logic
+- `AuditRepository` interface exposes only `append()` + `findByDoseId()` — structural append-only enforcement
+- `Effect[]` return values decouple pure engine from I/O — no side effects in business logic
+- `crypto.randomUUID()` in adapter only — UUID generation stays outside pure functions (REQ-010)
+
+Runtime: ~3m 06s.
 
 ---
 
@@ -188,21 +194,22 @@ file path for implementation, acceptance criteria from spec.md,
 and [P] parallel marker where applicable.
 ```
 
-**What you get:** `specs/001-overdue-dose-alert/tasks.md` — 38 tasks
-across 7 phases:
+**What you get:** `specs/001-overdue-dose-alert/tasks.md` — 35 tasks
+across 6 phases:
 
-| Phase | Purpose | Tasks | Parallel |
-|---|---|---|---|
-| 1 — Setup | TypeScript project init | T001–T003 | T002, T003 |
-| 2 — Foundational | All types + port interfaces | T004–T014 | All 11 |
-| 3 — US1 (P1) | Overdue detection + care alert | T015–T022 | 6 of 8 |
-| 4 — US4 (P1) | Audit trail | T023–T026 | T025–T026 |
-| 5 — US2 (P2) | Escalation to charge nurse | T027–T030 | T029–T030 |
-| 6 — US3 (P2) | Anonymous ack rejection | T031–T034 | T033–T034 |
-| 7 — Polish | Traceability matrix + validation | T035–T038 | T036–T038 |
+| Phase | Purpose | Tasks |
+|---|---|---|
+| 1 — Setup | TypeScript project init | T001–T007 |
+| 2 — Foundational | Types + ports + fakes | T008–T018 |
+| 3 — US1 (P1) | Care team alert + detection | T019–T026 |
+| 4 — US3 (P1) | Authenticated acknowledgment | T027–T028 |
+| 5 — US2 (P2) | Escalation to charge nurse | T029–T030 |
+| 6 — Polish | Postgres adapters + traceability | T031–T035 |
 
-100% requirement coverage — every REQ-NNN and SAFE-NNN traced to at
-least one task. MVP defined as Phases 1–4 (T001–T026).
+100% requirement coverage — every REQ-001 through REQ-012 traced to at
+least one task. MVP defined as Phases 1–3 (T001–T026).
+
+Runtime: ~2m 50s.
 
 ---
 
@@ -211,78 +218,92 @@ least one task. MVP defined as Phases 1–4 (T001–T026).
 After the four spec commands, reference tasks by ID directly:
 
 ```
-Implement T015 from specs/001-overdue-dose-alert/tasks.md
+Implement T020 from specs/001-overdue-dose-alert/tasks.md
 ```
 
-Claude Code reads the task, resolves its dependencies, creates all
-required files, and verifies compilation — no extra prompt needed.
+Claude Code reads the task, resolves its dependency chain automatically,
+creates all required files, and verifies structure — no extra prompt needed.
 
-**What T015 produces** (verified output):
+**What T020 produces** (verified output):
 
 ```
-src/types/DoseState.ts          — discriminated union, @satisfies REQ-001
-src/types/DoseRecord.ts         — immutable interface
-src/types/DoseEventType.ts      — event type union
-src/types/AlertThresholdConfig.ts — config interface + validateConfig()
-src/types/InvalidTransitionError.ts — typed error for illegal transitions
-src/types/InvalidConfigError.ts — typed error for bad config
-src/engine/doseStateEngine.ts   — evaluatePendingDose() pure function
+src/types/domain.ts          — branded DoseId, PatientId, ActorId, EventId
+src/types/dose-event.ts      — immutable DoseEvent interface
+src/types/alert-record.ts    — AlertRecord discriminated union (4 variants)
+src/types/audit-entry.ts     — AuditEntry interface (UTC timestamp, actor ID)
+src/types/config.ts          — AlertThresholdConfig
+src/types/effects.ts         — Effect union (5-variant side-effect algebra)
+src/engine/detect.ts         — evaluateDetection() pure function
 ```
 
-`tsc --noEmit` → zero errors. `Date.now()` does not appear anywhere in
-business logic. All functions annotated `@satisfies REQ-NNN`.
+`Date.now()` does not appear anywhere in business logic (structurally verified).
+All functions annotated `@satisfies REQ-NNN`.
+
+Key implementation decisions Claude makes from the spec alone:
+- `elapsedMs < thresholdMs` — integer milliseconds, not floating-point minutes,
+  for exact precision at the 14:59.999 / 15:00.000 boundary the spec describes
+- Effect order: `WRITE_AUDIT → PERSIST_ALERT_RECORD → EMIT_ALERT_ACTIVE` —
+  audit written before transition is committed, per REQ-006
+- `eventId` injected as parameter — `crypto.randomUUID()` is non-deterministic
+  and cannot live inside a pure function (REQ-010)
+- Duplicate suppression: `if (current.kind !== 'INACTIVE') return []` —
+  one guard covers all non-INACTIVE states (REQ-003)
+
+Runtime: ~1m 56s.
 
 ---
 
 ## Step 5 — Generate Tests
 
 ```
-Implement T016 through T019 from specs/001-overdue-dose-alert/tasks.md
+Implement T021 and T022 from specs/001-overdue-dose-alert/tasks.md
 ```
 
-**What this produces** (verified output — 19 tests, all passing):
+**What this produces** (verified output — 60 tests):
 
-| Task | Describe Block | Tests |
-|---|---|---|
-| T016 | `REQ-001: detect overdue dose at threshold` | 5 |
-| T017 | `REQ-007: no duplicate alerts` | 4 |
-| T018 | `REQ-008: configurable thresholds` | 7 |
-| T019 | `SAFE-003: determinism` | 3 |
+| Task | File | Describe Blocks | Tests |
+|---|---|---|---|
+| T021 | `tests/unit/engine/detect.test.ts` | 4 (REQ-001, REQ-002, REQ-003, REQ-010) | 26 |
+| T022 | `tests/unit/engine/config-validator.test.ts` | 3 (REQ-011, REQ-012, structural) | 34 |
 
 Key tests:
-- Boundary test: exactly 15 min → OVERDUE (not 14, not 16)
-- Determinism proof: different `nowUtc` → different output, proving no
-  hidden clock reads
-- `validateConfig` rejects `alertDelayMinutes: 0`, negative, non-integer
+- Boundary test: T+15:00.000 exactly → ALERT_ACTIVE fires; T+14:59.999 → silent
+- Determinism proof: repeated calls with identical inputs produce deep-equal results
+- `validateConfig` rejects `0`, negative, `1.5`, `NaN`, `±Infinity`, `null`, `undefined`
+- All tests use injected `Date` literals — `Date.now()` appears nowhere
+
+Runtime: ~2m 04s.
 
 ---
 
 ## Step 6 — Generate Traceability Matrix
 
 ```
-Implement T035 from specs/001-overdue-dose-alert/tasks.md
+Implement T034 from specs/001-overdue-dose-alert/tasks.md
 ```
 
-**What this produces:** `specs/001-overdue-dose-alert/traceability.md`
+**What this produces:** `specs/requirements.md`
 
-After implementing T015–T019 only, the honest matrix reads:
+After implementing T020–T022 only, the honest matrix reads:
 
 | Status | Count | Requirements |
 |---|---|---|
-| ✅ Pass | 3 | REQ-001, REQ-008, SAFE-003 |
-| ⚠ Partial | 1 | REQ-007 (engine done; dispatch test pending T030) |
-| ❌ Missing | 7 | REQ-002–006, SAFE-001, SAFE-002 |
+| ✅ Complete | 5 | REQ-001, REQ-002, REQ-003, REQ-011, REQ-012 |
+| ⚠️ Partial | 2 | REQ-006, REQ-010 (detection done; escalate + acknowledge pending) |
+| ⏳ Pending | 5 | REQ-004, REQ-005, REQ-007, REQ-008, REQ-009 |
 
 The matrix is a living document. It reflects what is actually
 implemented — not what was planned. Each gap maps to the specific task
-that closes it (T020–T034). SC-007 gate will not pass until all 11
+that closes it. The traceability gate will not pass until all 12
 requirements are covered.
+
+Runtime: ~1m 53s.
 
 ---
 
 ## Full Autonomous Implementation
 
-To implement all 38 tasks without manual task references:
+To implement all 35 tasks without manual task references:
 
 ```
 /speckit-implement
@@ -323,18 +344,18 @@ From an empty directory, four prompts produce:
 
 | Artifact | Content |
 |---|---|
-| `constitution.md` | 7 non-negotiable engineering principles |
-| `spec.md` | 4 user stories · 11 requirements · 5 entities · 6 success criteria |
-| `plan.md` + `data-model.md` | Architecture · TypeScript types · PostgreSQL schema · 7 ADRs |
-| `tasks.md` | 38 tasks · 7 phases · 24 parallelizable · 100% REQ coverage |
+| `constitution.md` | 7 NON-NEGOTIABLE engineering principles |
+| `spec.md` | 3 user stories · 12 requirements · 4 entities · 7 success criteria |
+| `plan.md` + `data-model.md` + `research.md` | Architecture · TypeScript types · PostgreSQL schema · 8 ADRs |
+| `tasks.md` | 35 tasks · 6 phases · parallelizable · 100% REQ coverage |
 
 Then three task references produce:
 
 | Artifact | Content |
 |---|---|
-| `doseStateEngine.ts` | Pure function · injected timestamps · @satisfies annotations · zero compile errors |
-| `doseStateEngine.test.ts` | 19 tests · 4 describe blocks labeled REQ-NNN · all passing |
-| `traceability.md` | Living matrix · honest partial coverage · gaps mapped to task IDs |
+| `src/engine/detect.ts` | Pure function · injected timestamps · `@satisfies` annotations · zero `Date.now()` |
+| `detect.test.ts` + `config-validator.test.ts` | 60 tests · 7 describe blocks labeled REQ-NNN · injected time throughout |
+| `specs/requirements.md` | Living matrix · honest partial coverage · gaps mapped to task IDs |
 
 Same AI. Completely different engineering.
 The spec is what made the difference.
