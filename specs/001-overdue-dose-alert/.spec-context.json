@@ -5,6 +5,11 @@
   "selectedAt": "2026-04-30T10:29:44.091Z",
   "currentStep": "specify",
   "status": "draft",
-  "stepHistory": {},
+  "stepHistory": {
+    "specify": {
+      "startedAt": "2026-04-20T19:17:31.100Z",
+      "completedAt": null
+    }
+  },
   "transitions": []
 }

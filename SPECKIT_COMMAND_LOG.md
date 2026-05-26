@@ -1,6 +1,6 @@
 # MDAM SpecKit Command Log
 **Project**: Medication Dose Alert Monitor
-**Path**: `~/dev/INCOSE-2026/mdam-demo`
+**Path**: `~/dev/OSN-2026/mdam-demo`
 **Date run**: April 20, 2026
 
 > Open this file in VS Code Markdown Preview (`Cmd+Shift+V`).
@@ -32,7 +32,7 @@ That gap is intentional. The point of this log is to demonstrate the workflow, n
 ## Setup
 
 ```bash
-cd ~/dev/INCOSE-2026/mdam-demo
+cd ~/dev/OSN-2026/mdam-demo
 specify init
 ```
 
@@ -656,7 +656,7 @@ npx vitest run
 
 **Output:**
 ```
- RUN  v1.6.1 /home/justin/dev/INCOSE-2026/mdam-demo
+ RUN  v1.6.1 /home/justin/dev/OSN-2026/mdam-demo
 
  ✓ tests/unit/engine/detect.test.ts            (26 tests)
  ✓ tests/unit/engine/config-validator.test.ts  (34 tests)
