@@ -1,0 +1,10 @@
+{
+  "workflow": "speckit",
+  "specName": "001-overdue-dose-alert",
+  "branch": "001-overdue-dose-alert",
+  "selectedAt": "2026-04-30T10:29:44.091Z",
+  "currentStep": "specify",
+  "status": "draft",
+  "stepHistory": {},
+  "transitions": []
+}

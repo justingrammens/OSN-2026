@@ -1,0 +1,74 @@
+{
+  "transitions": [
+    {
+      "step": "specify",
+      "substep": null,
+      "from": null,
+      "by": "extension",
+      "at": "2026-04-27T14:24:23.358Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-04-27T14:24:29.897Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-04-27T14:25:31.235Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-04-27T14:31:16.189Z"
+    },
+    {
+      "step": "specify",
+      "substep": null,
+      "from": {
+        "step": "plan",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-04-27T14:56:13.382Z"
+    },
+    {
+      "step": "plan",
+      "substep": null,
+      "from": {
+        "step": "specify",
+        "substep": null
+      },
+      "by": "extension",
+      "at": "2026-04-27T14:56:14.314Z"
+    }
+  ],
+  "currentStep": "plan",
+  "stepHistory": {
+    "specify": {
+      "startedAt": "2026-04-27T14:24:23.358Z",
+      "completedAt": "2026-04-27T14:24:29.897Z"
+    },
+    "plan": {
+      "startedAt": "2026-04-27T14:24:29.897Z",
+      "completedAt": "2026-04-27T14:25:31.234Z"
+    }
+  },
+  "status": "active",
+  "specName": "Specs"
+}
