@@ -263,6 +263,8 @@ VI.  Test Discipline        → One describe('REQ-NNN') per requirement  ✅ PAS
 VII. TypeScript Strict Mode → "strict": true, no any, discriminated unions ✅ PASS
 ```
 
+NOTE: ✅ PASS here means, "I have read the constitution. I have read the spec. The architecture I am proposing does not violate any principle." 
+
 **Traceability map in `plan.md` (REQ → Function → Test file):**
 ```
 REQ-001  engine/detect.ts:evaluateDetection      tests/unit/engine/detect.test.ts
@@ -400,6 +402,9 @@ Each task includes REQ-NNN identifiers, exact file path, acceptance criteria.
 ---
 
 ## Implementation — `Implement T020 from specs/001-overdue-dose-alert/tasks.md`
+
+
+Why this task? I read the task list, understood the dependency chain, and picked the task that best demonstrates the methodology — the detection engine. It's where the constitution's rules become visible in running code. Types and interfaces are foundational but not dramatic. evaluateDetection() is where everything lands.
 
 **Typed into Claude Code:**
 ```
@@ -672,6 +677,13 @@ grep -rn "Date.now()" src/
 `Date.now()` appears **zero** times in `src/`. Constitution Principle II said forbidden. Five COMPLETE rows in the traceability matrix and 60 passing tests confirm the rule was followed all the way down to the implementation.
 
 The matrix isn't a status board someone updates by hand. The matrix, the tests, and the file system all agree because they're all reading the same reality.
+
+**Check the current status**
+
+Run this in Claude
+```
+Read tasks.md and the current state of src/ and tests/. Tell me which tasks have been executed (files exist on disk) and which tasks are still pending. Format as two lists. Be concise
+```
 
 ---
 

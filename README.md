@@ -1,27 +1,28 @@
 # MDAM — Medication Dose Alert Monitor
 
-> Companion repository to the INCOSE 2026 Healthcare Systems Engineering Conference talk:
-> **"Systems Engineering Agentic Cookbook"**
-> April 30, 2026 · 10:00–11:00 AM CT · Junior Ballroom
+> Companion repository to the Open Source North 2026 conference talk:
+> **"Spec First, Agents Second: Engineering AI Systems with Discipline"**
 > Justin Grammens — Lab651 & Recursive Awesome
 
-The slides are in `slides/INCOSE_SpecFirst_AI_Engineering_FINAL.pdf`.
+The slides are in `slides/OSN_Spec_First_Agents_Second_FINAL.pdf`.
 
 ---
 
 ## The Talk
 
-*AI-assisted development has accelerated how software is built, but many teams are finding that speed without structure leads to fragile systems, unclear intent, and loss of architectural discipline. Ad hoc "vibe coding" may work for isolated tasks, but it breaks down when applied to systems that require traceability, verification, and long-term evolution.*
+*AI-assisted development has dramatically accelerated how we build software. Tools like Claude Code, MCP servers, Copilot, and local LLMs make it easy to generate code and spin up agentic workflows. But speed without structure leads to drift, fragile systems, and loss of architectural intent.*
 
-The talk presents a practical, systems-first approach built on three ingredients:
+*In real-world production environments — where performance, collaboration, and long-term maintainability matter — "vibe coding" does not scale.*
 
-| | Ingredient | What It Provides |
+This session introduces a practical, open source approach to AI-Assisted Engineering grounded in three ideas:
+
+| | Idea | What It Provides |
 |---|---|---|
-| 01 | **Systems-First Lifecycle Thinking** | Connect every decision to the full system lifecycle — from requirement to design to verification to post-deployment evolution |
-| 02 | **Spec-Driven Development** | Structure before syntax. The specification is the primary engineering artifact. Code is its deterministic expression. |
-| 03 | **AI-Assisted Execution** | AI operates within defined constraints — not instead of them. The spec is the AI's instruction manual and its safety boundary. |
+| 01 | **Specification-First Development** | Structure before syntax. Specs become durable artifacts that guide contributors, constrain LLM behavior, and preserve architectural clarity. |
+| 02 | **Product-Minded Engineering** | Connect requirements to real user outcomes. Every decision traces back to observable behavior, not implementation convenience. |
+| 03 | **Disciplined Use of AI Tools** | AI operates within defined constraints — not instead of them. The spec shapes and bounds agentic workflows. |
 
-> *In regulated industries, speed without structure is not a feature. It is a liability.*
+> *Rather than replacing engineering discipline, AI works best when paired with explicit intent, traceability, and shared understanding.*
 
 ---
 
@@ -30,7 +31,7 @@ The talk presents a practical, systems-first approach built on three ingredients
 MDAM is the live demo system from the talk. During the session, the audience watches it
 built in real time — spec to working tests — using four SpecKit commands and Claude Code.
 
-The scenario from slide 3:
+The scenario:
 
 > *2:47 AM. Room 412. Insulin overdue.*
 > *The alert system shows no overdue alerts. The code looks clean. Tests pass.*
@@ -38,8 +39,6 @@ The scenario from slide 3:
 > *No requirement captured the constraint. No test verified it. No trace connected hazard to code.*
 
 MDAM makes that failure mode structurally impossible.
-
-**Regulatory context:** IEC 62304 Class B · ISO 14971 · 21 CFR Part 11
 
 ---
 
@@ -62,19 +61,31 @@ INACTIVE → ALERT_ACTIVE → ALERT_ESCALATED → ACKNOWLEDGED
 - Never generates duplicate alerts for the same dose event
 - Records every state transition in an append-only audit log with UTC timestamp and actor ID
 
-> *This audit log is immutable. It IS your verification evidence under IEC 62304 and 21 CFR Part 11.*
-
 ---
 
 ## Why This System for the Demo
 
-MDAM was chosen specifically because it hits every systems engineering pressure point in a small surface area:
+MDAM was chosen specifically because it hits every engineering pressure point in a small surface area:
 
-- Timing constraints with regulatory implications
+- Timing constraints with clear behavioral boundaries
 - State transitions that must be explicit and exhaustive
 - Safety-critical behavior where silent failure is the worst failure mode
 - Human-in-the-loop (authenticated acknowledgment required)
-- Compliance-relevant audit that maps directly to post-market surveillance obligations
+- Audit trail that maps directly to real accountability obligations
+
+---
+
+## The Core Contrast
+
+| Vibe Coding Prompt | Spec-Driven Prompt |
+|---|---|
+| "Build me a medication alert system that notifies nurses when doses are late" | "Implement DoseStateEngine satisfying REQ-001 through REQ-012. Pure function. Injected timestamps. JSDoc tracing each method to requirement ID." |
+| setTimeout-based timing, no UTC, no injection | Pure function — no hidden state |
+| Hardcoded notification, no role map | Injected timestamps (deterministic, testable) |
+| Flag variable instead of state machine | Explicit state machine — all transitions typed |
+| No audit log, no actor tracking | Immutable audit entry on every transition |
+
+*Same AI. Completely different engineering. The spec is what made the difference.*
 
 ---
 
@@ -102,18 +113,6 @@ evaluateAcknowledgment(dose, alert, actorId, eventId) → Effect[]   [pending]
 Effect types: `WRITE_AUDIT` · `PERSIST_ALERT_RECORD` · `EMIT_ALERT_ACTIVE` ·
 `EMIT_ALERT_ESCALATED` · `EMIT_SYSTEM_ALERT`
 
-### The core contrast (from the talk)
-
-| Vibe Coding Prompt | Spec-Driven Prompt |
-|---|---|
-| "Build me a medication alert system that notifies nurses when doses are late" | "Implement DoseStateEngine satisfying REQ-001 through REQ-012. Pure function. Injected timestamps. JSDoc tracing each method to requirement ID." |
-| setTimeout-based timing, no UTC, no injection | Pure function — no hidden state |
-| Hardcoded notification, no role map | Injected timestamps (deterministic, testable) |
-| Flag variable instead of state machine | Explicit state machine — all transitions typed |
-| No audit log, no actor tracking | Immutable audit entry on every transition |
-
-*Same AI. Completely different engineering. The spec is what made the difference.*
-
 ### Key design decisions
 
 | Decision | Reason |
@@ -127,20 +126,18 @@ Effect types: `WRITE_AUDIT` · `PERSIST_ALERT_RECORD` · `EMIT_ALERT_ACTIVE` ·
 
 ---
 
-## SpecKit Maps to the V-Model
+## How SpecKit Maps to the Workflow
 
-From the talk — the same artifacts that IEC 62304 requires, now generated in minutes instead of weeks:
+From the talk — specs become the instruction manual for agents:
 
-| V-Model Phase | SpecKit Command | Output |
+| Phase | SpecKit Command | Output |
 |---|---|---|
-| System Requirements | `/speckit-constitution` | Non-negotiable principles · Regulatory standards · Safety constraints |
-| Software Requirements | `/speckit-specify` | REQ-NNN requirements · Acceptance scenarios · Boundary conditions |
-| Architectural Design | `/speckit-plan` | Constitution check · Traceability map · Data model · ADRs |
-| Detailed Design | `/speckit-tasks` | 35 tasks · File paths · REQ-NNN per task · Parallel markers |
+| System Intent | `/speckit-constitution` | Non-negotiable principles · Safety constraints · Governance rules |
+| Requirements | `/speckit-specify` | REQ-NNN requirements · Acceptance scenarios · Boundary conditions |
+| Architecture | `/speckit-plan` | Constitution check · Traceability map · Data model · ADRs |
+| Implementation Plan | `/speckit-tasks` | 35 tasks · File paths · REQ-NNN per task · Parallel markers |
 | Code Review | `@satisfies` annotations | Every export annotated · CI traceability check enforced |
-| Software Unit Verification | Test suite by REQ | 60 tests · 7 describe blocks labeled REQ-NNN · injected time |
-| Software Integration Test | Traceability matrix | `specs/requirements.md` · REQ → function → test → status |
-| System Validation | Quality gate pipeline | `npm run check` · tsc · coverage ≥90% · traceability CI |
+| Verification | Test suite by REQ | 60 tests · 7 describe blocks labeled REQ-NNN · injected time |
 
 ---
 
@@ -148,7 +145,7 @@ From the talk — the same artifacts that IEC 62304 requires, now generated in m
 
 ```
 slides/
-  INCOSE_SpecFirst_AI_Engineering_FINAL.pdf  — conference talk slides
+  OSN_Spec_First_Agents_Second_FINAL.pdf  — conference talk slides
 
 src/
   types/
@@ -177,7 +174,7 @@ specs/
     tasks.md            — 35 tasks · 6 phases · parallelization markers · 100% REQ coverage
     contracts/
       alert-service.ts  — typed port interfaces (AuditRepository, AlertRepository, Notifier)
-  requirements.md       — living traceability matrix (IEC 62304 §5.5.5)
+  requirements.md       — living traceability matrix
 
 .specify/
   memory/
@@ -352,7 +349,7 @@ VERIFICATION — testable criteria, not subjective ones
 
 > *A spec is not bureaucracy. It's the difference between building fast and building right fast.*
 
-> *Traceability isn't a compliance artifact. It's how you prove — to yourself, your team, and a regulator — that you knew what you were doing.*
+> *Traceability isn't a compliance artifact. It's how you prove — to yourself, your team, and your users — that you knew what you were doing.*
 
 ---
 
